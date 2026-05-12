@@ -2,19 +2,54 @@
 import { ref, computed } from 'vue';
 
 const nombre = ref('');
+const edad = ref(null);
+const biografia = ref('');
+const nivel = ref('');
+const intereses = ref([]);
+const pais = ref(null);
+const tecnologias = ref([]);
+const niveles = ['Junior', 'Semi Senior', 'Senior'];
+const opciones = ['Vue', 'React', 'Angular', 'Svelte', 'Astro'];
+const paises = [
+  {
+    code: 'CL',
+    nombre: 'Chile',
+  },
+  {
+    code: 'AR',
+    nombre: 'Argentina',
+  },
+  {
+    code: 'VE',
+    nombre: 'Venezuela',
+  },
+];
 
 const resumen = computed(() => ({
   nombre: nombre.value,
+  edad: edad.value,
+  biografia: biografia.value,
+  nivel: nivel.value,
+  intereses: intereses.value,
+  pais: pais.value,
+  tecnologias: tecnologias.value,
 }));
+
+const imprimirResumenConsola = (data) => {
+  console.log('===================================');
+  console.log('Resumen del registro:');
+  console.group(data);
+};
 </script>
 
 <template>
   <div class="container">
-    <div class="row">
+    <div class="row pt-5">
       <div class="col-12 col-lg-6">
         <h1 class="mb-4">Formulario de registro</h1>
 
-        <form>
+        <form @submit.prevent="imprimirResumenConsola(resumen)">
+          <!-- Nombre -->
           <div class="mb-4">
             <label for="registroNombre" class="form-label">Nombre</label>
             <input
@@ -25,12 +60,94 @@ const resumen = computed(() => ({
               v-model.trim="nombre"
             />
           </div>
+
+          <!-- Edad -->
+          <div class="mb-4">
+            <label class="form-label">Edad</label>
+            <input
+              type="number"
+              v-model.number="edad"
+              class="form-control"
+              :class="{
+                'is-invalid': edad !== null && (edad < 0 || edad > 120),
+              }"
+              placeholder="Ingrese un número entre 0 y 120"
+            />
+            <!-- mensaje de error -->
+            <small class="invalid-feedback">Debe ser un número entre 0 y 120</small>
+          </div>
+
+          <!-- Biografía -->
+          <div class="mb-4">
+            <label class="form-label">Biografía</label>
+            <textarea v-model.lazy="biografia" class="form-control" rows="4"></textarea>
+            <small class="text-muted">Caracteres: {{ biografia.length }}</small>
+          </div>
+
+          <!-- Nivel -->
+          <div class="mb-4">
+            <label class="form-label d-block">Nivel</label>
+            <div v-for="n in niveles" :key="n" class="form-check form-check-inline">
+              <input
+                type="radio"
+                :value="n"
+                class="form-check-input"
+                v-model="nivel"
+                :id="`r-${n}`"
+              />
+              <label :for="`r-${n}`" class="form-check-label"> {{ n }}</label>
+            </div>
+          </div>
+
+          <!-- Intereses -->
+          <div class="mb-4">
+            <label class="form-label d-block">Intereses</label>
+            <div v-for="o in opciones" class="form-check form-check-inline" :key="o">
+              <input
+                type="checkbox"
+                :value="o"
+                :id="`c-${o}`"
+                class="form-check-input"
+                v-model="intereses"
+              />
+              <label :for="`c-${o}`" class="form-check-label">{{ o }}</label>
+            </div>
+          </div>
+
+          <!-- País -->
+          <div class="mb-4">
+            <label class="form-label">País</label>
+            <select class="form-select" v-model="pais">
+              <option disabled :value="null">Selecciona un país</option>
+              <option v-for="p in paises" :value="p" :key="p.code">{{ p.nombre }}</option>
+            </select>
+          </div>
+
+          <!-- Tecnologías -->
+          <div class="mb-4">
+            <label class="form-label">Tecnolgías</label>
+            <select class="form-select" v-model="tecnologias" multiple>
+              <option v-for="o in opciones" :value="o" :key="o">{{ o }}</option>
+            </select>
+            <small>Puede seleccionar más de una opción</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary mb-4">Enviar</button>
         </form>
       </div>
       <div class="col-12 col-lg-6">
-        <h2 class="h1">Vista previa</h2>
-
-        <p>{{ nombre }}</p>
+        <h2 class="h1 mb-4">Vista previa</h2>
+        <article class="card p-3 mb-5 shadow">
+          <ul class="list-group list-group-flush">
+            <li
+              class="list-group-item list-group-item-warning"
+              v-for="(r, index) in resumen"
+              :key="index"
+            >
+              {{ r }}
+            </li>
+          </ul>
+        </article>
       </div>
     </div>
   </div>
