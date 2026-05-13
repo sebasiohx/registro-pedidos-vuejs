@@ -35,10 +35,18 @@ const resumen = computed(() => ({
   tecnologias: tecnologias.value,
 }));
 
+// funcion para ver si alguno de los datos de registro deja de ser falsy (o si los arrays tienen 0 elementos)
+const tieneDatos = computed(() => {
+  return Object.values(resumen.value).some((valor) => {
+    if (Array.isArray(valor)) return valor.length > 0;
+    return Boolean(valor);
+  });
+});
+
 const imprimirResumenConsola = (data) => {
   console.log('===================================');
   console.log('Resumen del registro:');
-  console.group(data);
+  console.group(JSON.stringify(data));
 };
 </script>
 
@@ -138,13 +146,30 @@ const imprimirResumenConsola = (data) => {
       <div class="col-12 col-lg-6">
         <h2 class="h1 mb-4">Vista previa</h2>
         <article class="card p-3 mb-5 shadow">
-          <ul class="list-group list-group-flush">
-            <li
-              class="list-group-item list-group-item-warning"
-              v-for="(r, index) in resumen"
-              :key="index"
-            >
-              {{ r }}
+          <p v-if="!tieneDatos" class="mb-0 text-center">(Sin datos)</p>
+          <ul v-else class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-warning">
+              <strong>Nombre:</strong> {{ nombre }}
+            </li>
+            <li class="list-group-item list-group-item-warning">
+              <strong>Edad:</strong> {{ edad }}
+            </li>
+            <li class="list-group-item list-group-item-warning">
+              <strong>Biografía:</strong> {{ biografia }}
+            </li>
+            <li class="list-group-item list-group-item-warning">
+              <strong>Nivel:</strong> {{ nivel }}
+            </li>
+            <li class="list-group-item list-group-item-warning">
+              <strong>Intereses: </strong> {{ intereses.length < 1 ? '' : intereses.join(', ') }}
+            </li>
+            <li class="list-group-item list-group-item-warning">
+              <strong>País:</strong> {{ pais !== null ? pais.nombre : '' }}
+              {{ pais !== null ? `(${pais.code})` : '' }}
+            </li>
+            <li class="list-group-item list-group-item-warning">
+              <strong>Tecnologías:</strong>
+              {{ tecnologias.length < 1 ? '' : tecnologias.join(', ') }}
             </li>
           </ul>
         </article>
