@@ -38,6 +38,7 @@ const resumen = computed(() => ({
 // funcion para ver si alguno de los datos de registro deja de ser falsy (o si los arrays tienen 0 elementos)
 const tieneDatos = computed(() => {
   return Object.values(resumen.value).some((valor) => {
+    if (valor === 0) return true;
     if (Array.isArray(valor)) return valor.length > 0;
     return Boolean(valor);
   });
@@ -48,6 +49,12 @@ const imprimirResumenConsola = (data) => {
   console.log('Resumen del registro:');
   console.group(JSON.stringify(data));
 };
+
+const formularioValido = computed(() => {
+  return (
+    nombre.value.length >= 3 && edad.value >= 0 && edad.value <= 120 && intereses.value.length >= 1
+  );
+});
 </script>
 
 <template>
@@ -59,19 +66,23 @@ const imprimirResumenConsola = (data) => {
         <form @submit.prevent="imprimirResumenConsola(resumen)">
           <!-- Nombre -->
           <div class="mb-4">
-            <label for="registroNombre" class="form-label">Nombre</label>
+            <label for="registroNombre" class="form-label">Nombre*</label>
             <input
               type="text"
               class="form-control"
+              :class="{
+                'is-invalid': nombre.length <= 2,
+              }"
               id="registroNombre"
               placeholder="Ingrese un nombre"
               v-model.trim="nombre"
             />
+            <small class="invalid-feedback">El campo Nombre es requerido</small>
           </div>
 
           <!-- Edad -->
           <div class="mb-4">
-            <label class="form-label">Edad</label>
+            <label class="form-label">Edad*</label>
             <input
               type="number"
               v-model.number="edad"
@@ -109,8 +120,15 @@ const imprimirResumenConsola = (data) => {
 
           <!-- Intereses -->
           <div class="mb-4">
-            <label class="form-label d-block">Intereses</label>
-            <div v-for="o in opciones" class="form-check form-check-inline" :key="o">
+            <label class="form-label d-block">Intereses*</label>
+            <div
+              v-for="o in opciones"
+              class="form-check form-check-inline"
+              :class="{
+                'is-invalid': intereses.length === 0,
+              }"
+              :key="o"
+            >
               <input
                 type="checkbox"
                 :value="o"
@@ -120,6 +138,7 @@ const imprimirResumenConsola = (data) => {
               />
               <label :for="`c-${o}`" class="form-check-label">{{ o }}</label>
             </div>
+            <small class="invalid-feedback">Seleccione al menos una opción</small>
           </div>
 
           <!-- País -->
@@ -140,9 +159,12 @@ const imprimirResumenConsola = (data) => {
             <small>Puede seleccionar más de una opción</small>
           </div>
 
-          <button type="submit" class="btn btn-primary mb-4">Enviar</button>
+          <button type="submit" class="btn btn-primary btn-lg mb-4" :disabled="!formularioValido">
+            Enviar
+          </button>
         </form>
       </div>
+
       <div class="col-12 col-lg-6">
         <h2 class="h1 mb-4">Vista previa</h2>
         <article class="card p-3 mb-5 shadow">
@@ -161,7 +183,7 @@ const imprimirResumenConsola = (data) => {
               <strong>Nivel:</strong> {{ nivel }}
             </li>
             <li class="list-group-item list-group-item-warning">
-              <strong>Intereses: </strong> {{ intereses.length < 1 ? '' : intereses.join(', ') }}
+              <strong>Intereses: </strong> {{ intereses.length <= 0 ? '' : intereses.join(', ') }}
             </li>
             <li class="list-group-item list-group-item-warning">
               <strong>País:</strong> {{ pais !== null ? pais.nombre : '' }}
@@ -169,7 +191,7 @@ const imprimirResumenConsola = (data) => {
             </li>
             <li class="list-group-item list-group-item-warning">
               <strong>Tecnologías:</strong>
-              {{ tecnologias.length < 1 ? '' : tecnologias.join(', ') }}
+              {{ tecnologias.length <= 0 ? '' : tecnologias.join(', ') }}
             </li>
           </ul>
         </article>
